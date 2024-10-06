@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style id="themeStyle">
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            font-size: 1.1em;
+            color: #555;
+        }
+        .nav-links a {
+            background-color: #4caf50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .nav-links a:hover {
+            background-color: #45a049;
+        }
+        .dark {
+            background-color: #181818;
+            color: #ffffff;
+        }
+        .dark .container {
+            background-color: #222;
+        }
+        /* Адаптация под мобильные устройства */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            .nav-links a {
+                margin-bottom: 15px;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Добро пожаловать в менеджер задач</h1>
+        <p>Используйте приложение для отслеживания ваших задач, причин их невыполнения и общей статистики.</p>
+
+        <div class="nav-links">
+            <a href="Task/task.html">Задачник</a>
+            <a href="Note/note.html">Причины невыполнения</a>
+            <a href="Stat/stat.html">Статистика</a>
+        </div>
+
+        <button id="themeToggle" style="margin-top: 20px;">Переключить тему</button>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+        });
+    </script>
+</body>
+</html>

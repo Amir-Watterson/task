@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика задач</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .stats {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        /* Стиль для блоков графиков */
+        .charts-container {
+            margin-top: 30px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 40px;
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Статистика задач</h1>
+        <div class="stats">
+            <p>Выполненные задачи: <span id="completedTasks">0</span></p>
+            <p>Невыполненные задачи: <span id="pendingTasks">0</span></p>
+        </div>
+
+        <!-- Блок для графиков -->
+        <div class="charts-container">
+            <h2>Задачи за неделю</h2>
+            <div class="chart-container">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+
+            <h2>Задачи за месяц</h2>
+            <div class="chart-container">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+
+            <h2>Задачи за год</h2>
+            <div class="chart-container">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function loadStats() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const pendingTasks = tasks.length - completedTasks;
+
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('pendingTasks').textContent = pendingTasks;
+
+            generateCharts(tasks);
+        }
+
+        // Функция для генерации всех графиков
+        function generateCharts(tasks) {
+            // Генерация данных для графика задач за неделю
+            const weeklyData = generateWeeklyData(tasks);
+            const weeklyChart = new Chart(document.getElementById('weeklyChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: weeklyData.labels,
+                    datasets: [{
+                        label: 'Выполненные задачи',
+                        data: weeklyData.data,
+                        backgroundColor: '#4caf50'
+                    }]
+                }
+            });
+
+            // Генерация данных для графика задач за месяц
+            const monthlyData = generateMonthlyData(tasks);
+            const monthlyChart = new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [{
+                        label: 'Выполненные задачи',
+                        data: monthlyData.data,
+                        backgroundColor: '#4caf50'
+                    }]
+                }
+            });
+
+            // Генерация данных для графика задач за год
+            const yearlyData = generateYearlyData(tasks);
+            const yearlyChart = new Chart(document.getElementById('yearlyChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: yearlyData.labels,
+                    datasets: [{
+                        label: 'Выполненные задачи',
+                        data: yearlyData.data,
+                        backgroundColor: '#4caf50'
+                    }]
+                }
+            });
+        }
+
+        // Функция для генерации данных за неделю
+        function generateWeeklyData(tasks) {
+            const labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            const data = [0, 0, 0, 0, 0, 0, 0];  // по 0 для каждого дня недели
+
+            const today = new Date();
+            const currentDay = today.getDay(); // текущий день недели
+
+            tasks.forEach(task => {
+                if (task.completed) {
+                    const taskDate = new Date(task.id);
+                    const dayOfWeek = taskDate.getDay();
+                    const diff = Math.floor((today - taskDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (diff <= 6) { // Если задача была выполнена в течение недели
+                        data[(currentDay + 6 - diff) % 7]++; // записываем в соответствующий день недели
+                    }
+                }
+            });
+
+            return { labels, data };
+        }
+
+        // Функция для генерации данных за месяц
+        function generateMonthlyData(tasks) {
+            const labels = [];
+            const data = [];
+            const daysInMonth = 30;  // кол-во дней в месяце
+
+            for (let i = daysInMonth; i > 0; i--) {
+                labels.push(`${i} дн. назад`);
+                data.push(0);
+            }
+
+            const today = new Date();
+            tasks.forEach(task => {
+                if (task.completed) {
+                    const taskDate = new Date(task.id);
+                    const diff = Math.floor((today - taskDate) / (1000 * 60 * 60 * 24));
+
+                    if (diff <= daysInMonth) {  // Если задача выполнена за последние 30 дней
+                        data[daysInMonth - diff - 1]++;
+                    }
+                }
+            });
+
+            return { labels, data };
+        }
+
+        // Функция для генерации данных за год
+        function generateYearlyData(tasks) {
+            const labels = ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+            const data = Array(12).fill(0); // 12 месяцев
+
+            const today = new Date();
+            tasks.forEach(task => {
+                if (task.completed) {
+                    const taskDate = new Date(task.id);
+                    const taskMonth = taskDate.getMonth();
+                    const diff = today.getFullYear() - taskDate.getFullYear();
+
+                    if (diff === 0) { // Если задача выполнена в текущем году
+                        data[taskMonth]++;
+                    }
+                }
+            });
+
+            return { labels, data };
+        }
+
+        // Загружаем статистику и графики при загрузке страницы
+        loadStats();
+    </script>
+    
+</body>
+</html>

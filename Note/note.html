@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Почему я не выполнил задачу?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .reason-form {
+            margin-top: 20px;
+        }
+        .reason-form select {
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .reason-form button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .reason-form button:hover {
+            background-color: #45a049;
+        }
+        .stats {
+            margin-top: 30px;
+        }
+        .stats p {
+            font-size: 1.2em;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 40px;
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Почему я не выполнил задачу?</h1>
+
+        <!-- Форма для выбора причины -->
+        <div class="reason-form">
+            <select id="reasonSelect">
+                <option value="laziness">Лень</option>
+                <option value="distractions">Мешали другие</option>
+                <option value="no-opportunity">Не было возможностей</option>
+                <option value="procrastination">Прокрастинация</option>
+            </select>
+            <button onclick="submitReason()">Добавить причину</button>
+        </div>
+
+        <!-- Счетчик причин -->
+        <div class="stats">
+            <p>Лень: <span id="lazinessCount">0</span></p>
+            <p>Мешали другие: <span id="distractionsCount">0</span></p>
+            <p>Не было возможностей: <span id="noOpportunityCount">0</span></p>
+            <p>Прокрастинация: <span id="procrastinationCount">0</span></p>
+        </div>
+
+        <!-- Круговая диаграмма -->
+        <div class="chart-container">
+            <canvas id="reasonChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Подключаем Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Инициализация данных для диаграммы
+        const reasonsData = {
+            laziness: 0,
+            distractions: 0,
+            noOpportunity: 0,
+            procrastination: 0
+        };
+
+        // Загрузка сохраненных данных из localStorage
+        function loadReasonsData() {
+            const savedData = JSON.parse(localStorage.getItem('reasonsData')) || reasonsData;
+            Object.assign(reasonsData, savedData);
+            updateStats();
+            updateChart();
+        }
+
+        // Обновление счетчиков на странице
+        function updateStats() {
+            document.getElementById('lazinessCount').textContent = reasonsData.laziness;
+            document.getElementById('distractionsCount').textContent = reasonsData.distractions;
+            document.getElementById('noOpportunityCount').textContent = reasonsData.noOpportunity;
+            document.getElementById('procrastinationCount').textContent = reasonsData.procrastination;
+        }
+
+        // Добавление выбранной причины
+        function submitReason() {
+            const reason = document.getElementById('reasonSelect').value;
+
+            if (reason === 'laziness') reasonsData.laziness++;
+            if (reason === 'distractions') reasonsData.distractions++;
+            if (reason === 'no-opportunity') reasonsData.noOpportunity++;
+            if (reason === 'procrastination') reasonsData.procrastination++;
+
+            localStorage.setItem('reasonsData', JSON.stringify(reasonsData));
+            updateStats();
+            updateChart();
+        }
+
+        // Обновление круговой диаграммы
+        function updateChart() {
+            const ctx = document.getElementById('reasonChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Лень', 'Мешали другие', 'Не было возможностей', 'Прокрастинация'],
+                    datasets: [{
+                        data: [
+                            reasonsData.laziness,
+                            reasonsData.distractions,
+                            reasonsData.noOpportunity,
+                            reasonsData.procrastination
+                        ],
+                        backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4caf50']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Загрузка данных и инициализация диаграммы при загрузке страницы
+        loadReasonsData();
+    </script>
+</body>
+</html>
